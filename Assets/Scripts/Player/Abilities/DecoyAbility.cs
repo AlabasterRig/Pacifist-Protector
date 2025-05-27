@@ -11,7 +11,7 @@ public class DecoyAbility : MonoBehaviour
         {
             if (hit.CompareTag("Enemy"))
             {
-                //hit.GetComponent<EnemyAI>()?.ChaseDecoy(transform);
+                hit.GetComponent<EnemyAIController>()?.ChaseDecoy(transform);
             }
         }
     }
