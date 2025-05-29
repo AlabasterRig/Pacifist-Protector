@@ -21,10 +21,10 @@ TagManager:
   - Decoy
   - Protected Creature
   - SafeZone
-  - 
-  - 
-  - 
-  - 
+  - Enemy
+  - Ground
+  - Walls
+  - Platform
   - 
   - 
   - 
@@ -43,6 +43,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 2184157593
+    locked: 0
+  - name: Decorations
+    uniqueID: 1837093315
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

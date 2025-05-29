@@ -8,9 +8,12 @@ public class EnemyAIController : MonoBehaviour
     public float ChaseCooldown = 3f;
 
     public List<Transform> PatrolPoints;
+    public Animator animator;
     private int CurrentPatrolIndex = 0;
 
-    private Transform CurrentTarget;
+    private Transform ProtectedTarget;
+    private float ProtectedChaseTimer = 0f;
+    public float ProtectedChaseDuration = 5f;
     private Transform DecoyTarget;
     private Vector2 MovementTarget;
     private bool HasTarget = false;
@@ -28,19 +31,57 @@ public class EnemyAIController : MonoBehaviour
         if (DecoyTarget != null)
         {
             DecoyTimer -= Time.deltaTime;
-            if (DecoyTimer <= 0)
+            if (DecoyTimer <= 0 || !DecoyTarget.gameObject.activeInHierarchy)
             {
                 DecoyTarget = null;
+                HasTarget = false;
+            }
+        }
+        if (ProtectedTarget != null)
+        {
+            if (!ProtectedTarget.gameObject.activeInHierarchy)
+            {
+                ProtectedTarget = null;
+                HasTarget = false;
+            }
+            else
+            {
+                ProtectedChaseTimer -= Time.deltaTime;
+                if (ProtectedChaseTimer <= 0)
+                {
+                    ProtectedTarget = null;
+                    HasTarget = false;
+                }
             }
         }
 
+        // Priority: Decoy > Protected > Patrol
         if (DecoyTarget != null)
         {
             SetTarget(DecoyTarget.position);
         }
-        else if (FindNearestProtected(out Transform target))
+        else if (ProtectedTarget != null)
         {
-            SetTarget(target.position);
+            float distance = Vector2.Distance(transform.position, ProtectedTarget.position);
+
+            if (distance < 0.5f)
+            {
+                ProtectedTarget = null;
+                ProtectedChaseTimer = 0f;
+                HasTarget = false;
+                return;
+            }
+
+            SetTarget(ProtectedTarget.position);
+        }
+        else if (FindNearestProtected(out Transform newProtected))
+        {
+            if (ProtectedTarget != newProtected)
+            {
+                ProtectedTarget = newProtected;
+                ProtectedChaseTimer = ProtectedChaseDuration;
+            }
+            SetTarget(ProtectedTarget.position);
         }
         else
         {
@@ -54,15 +95,16 @@ public class EnemyAIController : MonoBehaviour
         {
             TryMoveTo(MovementTarget);
         }
+        StickToGround();
     }
 
-    void SetTarget(Vector2 targetPos)
+    private void SetTarget(Vector2 targetPos)
     {
         MovementTarget = targetPos;
         HasTarget = true;
     }
 
-    void TryMoveTo(Vector2 targetPos)
+    private void TryMoveTo(Vector2 targetPos)
     {
         Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
         float moveStep = Speed * Time.fixedDeltaTime;
@@ -72,6 +114,7 @@ public class EnemyAIController : MonoBehaviour
         if (!hit)
         {
             rb.MovePosition(nextPos);
+            animator.SetFloat("Speed", moveStep);
         }
         else
         {
@@ -79,12 +122,11 @@ public class EnemyAIController : MonoBehaviour
         }
     }
 
-    void MoveTo(Vector2 targetPos)
+    private void MoveTo(Vector2 targetPos)
     {
         Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
         Vector2 newPos = (Vector2)transform.position + dir * Speed * Time.deltaTime;
 
-        // Barrier avoidance using raycast
         RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, 0.5f, LayerMask.GetMask("Obstacle"));
         if (!hit)
         {
@@ -92,7 +134,7 @@ public class EnemyAIController : MonoBehaviour
         }
     }
 
-    void Patrol()
+    private void Patrol()
     {
         if (PatrolPoints.Count == 0) return;
 
@@ -105,7 +147,28 @@ public class EnemyAIController : MonoBehaviour
         }
     }
 
-    bool FindNearestProtected(out Transform closest)
+    private void StickToGround()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, LayerMask.GetMask("Ground"));
+
+        if (hit.collider != null)
+        {
+            Vector3 pos = transform.position;
+            // Adjusting Y postion for standing on the ground
+            pos.y = hit.point.y + GetComponent<Collider2D>().bounds.extents.y;
+            transform.position = pos;
+        }
+    }
+
+    public void OnProtectedCreatureDestroyed(Transform destroyedTarget)
+    {
+        if (ProtectedTarget == destroyedTarget)
+        {
+            ProtectedTarget = null;
+        }
+    }
+
+    private bool FindNearestProtected(out Transform closest)
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, DetectionRadius);
         float closestDist = Mathf.Infinity;
@@ -133,7 +196,7 @@ public class EnemyAIController : MonoBehaviour
         DecoyTimer = ChaseCooldown;
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, DetectionRadius);

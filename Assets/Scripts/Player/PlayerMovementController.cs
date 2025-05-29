@@ -25,7 +25,7 @@ public class PlayerMovementController : MonoBehaviour
     private void Update()
     {
         IsGrounded = Physics2D.OverlapCircle(GroundCheck.position, GroundCheckRadius, GroundLayer);
-        if (IsGrounded)
+        if (IsGrounded && Mathf.Abs(rb.linearVelocity.y) < 0.01f)
         {
             JumpCount = 0;
         }
@@ -36,9 +36,7 @@ public class PlayerMovementController : MonoBehaviour
 
     private void PlayerMovement(float HorizontalInput)
     {
-        Vector3 Position = transform.position;
-        Position.x += HorizontalInput * Speed * Time.deltaTime;
-        transform.position = Position;
+        rb.linearVelocity = new Vector2(HorizontalInput * Speed, rb.linearVelocity.y);
 
         if (Input.GetButtonDown("Jump") && JumpCount < MaxJumpCount)
         {

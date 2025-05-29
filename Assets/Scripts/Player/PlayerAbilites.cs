@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -38,18 +39,18 @@ public class PlayerAbilites : MonoBehaviour
         }
     }
 
-    void SpawnBarrier(Vector2 Position)
+    private void SpawnBarrier(Vector2 Position)
     {
         GameObject Barrier = Instantiate(BarrierPrefab, Position, Quaternion.identity);
         Destroy(Barrier, BarrierLifetime);
         NextBarrierTime = Time.time + BarrierCooldown;
     }
 
-    void SpawnDecoy(Vector2 Position)
+    private void SpawnDecoy(Vector2 Position)
     {
-        Vector2 playerPos = transform.position;
+        Vector2 PlayerPos = transform.position;
 
-        if (Vector2.Distance(Position, playerPos) > DecoyRange)
+        if (Vector2.Distance(Position, PlayerPos) > DecoyRange)
         {
             return;
         }
@@ -58,10 +59,10 @@ public class PlayerAbilites : MonoBehaviour
 
         if (hit.collider != null)
         {
-            Vector2 spawnPos = hit.point;
-            spawnPos.y += 1.0f;
+            Vector2 SpawnPos = hit.point;
+            SpawnPos.y += 1.0f;
 
-            GameObject decoy = Instantiate(DecoyPrefab, spawnPos, Quaternion.identity);
+            GameObject decoy = Instantiate(DecoyPrefab, SpawnPos, Quaternion.identity);
             Destroy(decoy, DecoyLifetime);
             NextDecoyTime = Time.time + DecoyCooldown;
         }
@@ -71,46 +72,45 @@ public class PlayerAbilites : MonoBehaviour
         }
     }
 
-    void TeleportProtectedCreature(Vector2 TargetPos)
+    private void TeleportProtectedCreature(Vector2 TargetPos)
     {
-        // Check if the target point is within teleport radius
         if (Vector2.Distance(transform.position, TargetPos) > TeleportRange)
         {
             Debug.Log("Target point is out of teleport range.");
             return;
         }
 
-        // Check if ground exists at the target point
-        RaycastHit2D groundHit = Physics2D.Raycast(TargetPos, Vector2.down, 2f, GroundLayer);
-        if (groundHit.collider == null)
+        RaycastHit2D hit = Physics2D.Raycast(TargetPos, Vector2.down, 2f, GroundLayer);
+
+        if (hit.collider == null)
         {
             Debug.Log("Teleport destination is not on valid ground.");
             return;
         }
 
-        // Find the nearest Protected creature within teleport range
+        Vector2 SpawnPos = hit.point;
+        SpawnPos.y += 1.0f;
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, TeleportRange);
         Transform ClosestProtected = null;
         float ClosestDist = Mathf.Infinity;
 
-        foreach (var hit in hits)
+        foreach (var obj in hits)
         {
-            if (hit.CompareTag("Protected"))
+            if (obj.CompareTag("Protected"))
             {
-                float dist = Vector2.Distance(transform.position, hit.transform.position);
+                float dist = Vector2.Distance(transform.position, obj.transform.position);
                 if (dist < ClosestDist)
                 {
                     ClosestDist = dist;
-                    ClosestProtected = hit.transform;
+                    ClosestProtected = obj.transform;
                 }
             }
         }
 
         if (ClosestProtected != null)
         {
-            Vector2 teleportPos = groundHit.point;
-            teleportPos.y += 1.0f; // adjust height slightly above ground
-            ClosestProtected.position = teleportPos;
+            ClosestProtected.position = SpawnPos;
         }
         else
         {
