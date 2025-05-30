@@ -1,6 +1,4 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class PlayerMovementController : MonoBehaviour
 {

@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 2608232103007433983}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -183,8 +183,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
+  m_Offset: {x: 0, y: 0.0751577}
+  m_Radius: 0.959297
 --- !u!114 &1491263785526304491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,14 +197,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69fe986c83c6f6841a83bdb02b7d1bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 2
+  Speed: 6
   DetectionRadius: 5
   ChaseCooldown: 3
   PatrolPoints:
   - {fileID: 8695828176282046959}
   - {fileID: 2962450448441770137}
   animator: {fileID: 2608232103007433983}
-  ProtectedChaseDuration: 5
+  ProtectedChaseDuration: 2
 --- !u!95 &2608232103007433983
 Animator:
   serializedVersion: 7

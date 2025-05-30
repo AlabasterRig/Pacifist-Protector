@@ -33,6 +33,8 @@ public class ProtectedCreatureController : MonoBehaviour
     {
         if (collision.CompareTag("Safezone"))
         {
+            ScoreController.Instance.AddScore(10);
+            ScoreController.Instance?.OnCreatureSaved(); 
             NotifyEnemiesBeforeDestruction();
             Destroy(gameObject);
         }

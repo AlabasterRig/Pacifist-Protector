@@ -69,6 +69,10 @@ public class EnemyAIController : MonoBehaviour
                 ProtectedTarget = null;
                 ProtectedChaseTimer = 0f;
                 HasTarget = false;
+                if (animator != null)
+                {
+                    animator.SetTrigger("LostTarget");
+                }
                 return;
             }
 
@@ -86,6 +90,12 @@ public class EnemyAIController : MonoBehaviour
         else
         {
             Patrol();
+        }
+
+        if (!HasTarget && animator != null)
+        {
+            animator.SetFloat("Speed", Speed);
+            animator.SetTrigger("StartPatrol");
         }
     }
 
@@ -114,7 +124,19 @@ public class EnemyAIController : MonoBehaviour
         if (!hit)
         {
             rb.MovePosition(nextPos);
-            animator.SetFloat("Speed", moveStep);
+            if (animator != null)
+            {
+                animator.SetFloat("Speed", moveStep);
+            }
+
+            if (dir.x > 0.01f)
+            {
+                transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+            else if (dir.x < -0.01f)
+            {
+                transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
         }
         else
         {
@@ -131,12 +153,28 @@ public class EnemyAIController : MonoBehaviour
         if (!hit)
         {
             rb.MovePosition(newPos);
+            if (dir.x > 0.01f)
+            {
+                transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+            else if (dir.x < -0.01f)
+            {
+                transform.localScale = new Vector3(-1f, 1f, 1f);
+            }
         }
     }
 
     private void Patrol()
     {
-        if (PatrolPoints.Count == 0) return;
+        if (PatrolPoints.Count == 0)
+        {
+            return;
+        }
+
+        if (!HasTarget && animator != null)
+        {
+            animator.SetTrigger("StartPatrol");
+        }
 
         Transform point = PatrolPoints[CurrentPatrolIndex];
         MoveTo(point.position);
@@ -144,6 +182,11 @@ public class EnemyAIController : MonoBehaviour
         if (Vector2.Distance(transform.position, point.position) < 0.2f)
         {
             CurrentPatrolIndex = (CurrentPatrolIndex + 1) % PatrolPoints.Count;
+        }
+
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", Speed);
         }
     }
 
@@ -165,6 +208,12 @@ public class EnemyAIController : MonoBehaviour
         if (ProtectedTarget == destroyedTarget)
         {
             ProtectedTarget = null;
+            HasTarget = false;
+
+            if (animator != null)
+            {
+                animator.SetTrigger("LostTarget");
+            }
         }
     }
 
@@ -194,6 +243,7 @@ public class EnemyAIController : MonoBehaviour
     {
         DecoyTarget = decoy;
         DecoyTimer = ChaseCooldown;
+        HasTarget = true;
     }
 
     private void OnDrawGizmosSelected()
