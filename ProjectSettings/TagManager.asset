@@ -2,24 +2,29 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Foreground
+  - Protected
+  - Enemy
+  - Decoy
+  - Safezone
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Foreground
+  - Obstacle
+  - Decoy
+  - Protected Creature
+  - SafeZone
+  - Enemy
+  - Ground
+  - Walls
+  - Platform
   - 
   - 
   - 
@@ -38,6 +43,14 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 2184157593
+    locked: 0
+  - name: Decorations
+    uniqueID: 1837093315
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default
